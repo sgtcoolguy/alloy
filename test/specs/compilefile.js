@@ -1,5 +1,4 @@
-var fs = require('fs'),
-	wrench = require('wrench'),
+var fs = require('fs-extra'),
 	path = require('path'),
 	DOMParser = require('xmldom').DOMParser,
 	TU = require('../lib/testUtils'),
@@ -22,11 +21,9 @@ describe('alloy selective compile', function() {
 	it('preparing test app', function() {
 
 		// Create a copy of Harness to work with
-		wrench.rmdirSyncRecursive(Harness, true);
-		wrench.mkdirSyncRecursive(Harness, 0777);
-		wrench.copyDirSyncRecursive(HarnessTemplate, Harness, {
-			forceDelete: true
-		});
+		fs.rmdirSyncRecursive(Harness/*, true*/); // FIXME How do we fail silently with fs-extra?
+		fs.mkdirsSync(Harness, { mode: 0777 });
+		fs.copySync(HarnessTemplate, Harness);
 		TU.asyncExecTest('alloy new "' + Harness + '"', {
 				test: function() {
 					expect(this.output.error).toBeFalsy();

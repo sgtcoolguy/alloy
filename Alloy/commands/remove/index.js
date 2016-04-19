@@ -1,7 +1,6 @@
 var colors = require('colors'),
-	fs = require('fs'),
+	fs = require('fs-extra'),
 	path = require('path'),
-	wrench = require('wrench'),
 	_ = require("../../lib/alloy/underscore")._,
 	U = require('../../utils'),
 	CONST = require('../../common/constants'),

@@ -3,9 +3,8 @@
 	provided by the UglifyJS library
 */
 var SM = require('source-map'),
-	fs = require('fs'),
+	fs = require('fs-extra'),
 	path = require('path'),
-	wrench = require('wrench'),
 	U = require('../../utils'),
 	CONST = require('../../common/constants'),
 	uglifyjs = require('uglify-js'),
@@ -128,7 +127,7 @@ exports.generateCodeAndSourceMap = function(generator, compileConfig) {
 	// write the generated controller code
 	var outfile = target.filepath;
 	var relativeOutfile = path.relative(compileConfig.dir.project,outfile);
-	wrench.mkdirSyncRecursive(path.dirname(outfile), 0755);
+	fs.mkdirsSync(path.dirname(outfile), { mode: 0755 });
 	fs.writeFileSync(outfile, stream.toString());
 	logger.info('  created:    "' + relativeOutfile + '"');
 
@@ -137,7 +136,7 @@ exports.generateCodeAndSourceMap = function(generator, compileConfig) {
 		var mapDir = path.join(compileConfig.dir.project,CONST.DIR.MAP);
 		outfile = path.join(mapDir,relativeOutfile) + '.' + CONST.FILE_EXT.MAP;
 		relativeOutfile = path.relative(compileConfig.dir.project,outfile);
-		wrench.mkdirSyncRecursive(path.dirname(outfile), 0755);
+		fs.mkdirsSync(path.dirname(outfile), { mode: 0755 });
 		fs.writeFileSync(outfile, sourceMap.toString());
 		logger.debug('  map:        "' + relativeOutfile + '"');
 	}
@@ -210,7 +209,7 @@ exports.generateSourceMap = function(generator, compileConfig) {
 	var relativeOutfile = path.relative(compileConfig.dir.project,target.filepath);
 	var mapDir = path.join(compileConfig.dir.project,CONST.DIR.MAP);
 	var outfile = path.join(mapDir,relativeOutfile,path.basename(target.filename)) + '.' + CONST.FILE_EXT.MAP;
-	wrench.mkdirSyncRecursive(path.dirname(outfile), 0755);
+	fs.mkdirsSync(path.dirname(outfile), { mode: 0755 });
 	var tmp = JSON.parse(sourceMap.toString())
 	tmp.sources[0] = compiledFileName;
 	tmp.sources[1] = origFileName;

@@ -3,9 +3,8 @@
 	on subsequent compiles. For example, the base client-side lib, alloy.js, is
 	not deleted and recopied after the initial compile.
 */
-var fs = require('fs'),
+var fs = require('fs-extra'),
 	path = require('path'),
-	wrench = require('wrench'),
 	platforms = require('../../../platforms/index'),
 	logger = require('../../logger'),
 	CONST = require('../../common/constants'),
@@ -363,9 +362,9 @@ function remove(opts) {
 			if (targetStat.isDirectory()) {
 				if(opts.widgetId) {
 					// remove the widget's folder
-					wrench.rmdirSyncRecursive(path.resolve(runtimeFullpath, '..'), true);
+					fs.removeSync(path.resolve(runtimeFullpath, '..')/*, true */); // FIXME How do we fail silently with fs-extra?
 				} else {
-					wrench.rmdirSyncRecursive(runtimeFullpath, true);
+					fs.removeSync(runtimeFullpath/*, true*/); // FIXME How do we fail silently with fs-extra?
 				}
 			} else {
 				fs.unlinkSync(runtimeFullpath);

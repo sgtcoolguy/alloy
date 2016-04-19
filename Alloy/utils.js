@@ -1,11 +1,10 @@
 // The island of misfit toys... for functions
 
 var path = require('path'),
-	fs = require('fs'),
+	fs = require('fs-extra'),
 	colors = require('colors'),
 	crypto = require('crypto'),
 	util = require('util'),
-	wrench = require('wrench'),
 	jsonlint = require('jsonlint'),
 	resolve = require('resolve'),
 	paths = require('global-paths'),
@@ -146,7 +145,7 @@ exports.getAndValidateProjectPaths = function(argPath, opts) {
 	// Resources/app.js must be present, even if not used
 	var appjs = path.join(paths.resources, 'app.js');
 	if (!fs.existsSync(appjs)) {
-		wrench.mkdirSyncRecursive(paths.resources, 0755);
+		fs.mkdirsSync(paths.resources, { mode: 0755 });
 		fs.writeFileSync(appjs, '');
 	}
 
@@ -185,7 +184,7 @@ exports.updateFiles = function(srcDir, dstDir, opts) {
 	logger.trace('SRC_DIR=' + srcDir);
 
 	if (!fs.existsSync(dstDir)) {
-		wrench.mkdirSyncRecursive(dstDir, 0755);
+		fs.mkdirsSync(dstDir, { mode: 0755 });
 	}
 
 	// don't process XML/controller files inside .svn folders (ALOY-839)
@@ -247,7 +246,7 @@ exports.updateFiles = function(srcDir, dstDir, opts) {
 		} else {
 			if (srcStat.isDirectory()) {
 				logger.trace('Creating directory ' + path.relative(opts.rootDir, dst).yellow);
-				wrench.mkdirSyncRecursive(dst, 0755);
+				fs.mkdirsSync(dst, { mode: 0755 });
 			} else {
 				logger.trace('Copying ' + path.join('SRC_DIR', path.relative(srcDir, src)).yellow +
 					' --> ' + path.relative(opts.rootDir, dst).yellow);
@@ -439,9 +438,9 @@ exports.rmdirContents = function(dir, exceptions) {
 		// skip any exceptions
 		if (result) {
 			continue;
-		// use wrench to delete directories
+		// use fs-extra to delete directories
 		} else if (stat.isDirectory()) {
-			wrench.rmdirSyncRecursive(currFile, true);
+			fs.removeSync(currFile/*, true*/); // FIXME How do we fail silently with fs-extra?
 		// unlink any files or links
 		} else {
 			fs.unlinkSync(currFile);
@@ -492,7 +491,7 @@ exports.copyFileSync = function(srcFile, destFile) {
 
 exports.ensureDir = function(p) {
 	if (!fs.existsSync(p)) {
-		wrench.mkdirSyncRecursive(p, 0755);
+		fs.mkdirsSync(p, { mode: 0755 });
 	}
 };
 

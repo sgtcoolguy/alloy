@@ -1,7 +1,6 @@
 var ejs = require('ejs'),
 	path = require('path'),
-	fs = require('fs'),
-	wrench = require('wrench'),
+	fs = require('fs-extra'),
 	vm = require('vm'),
 	uglifyjs = require('uglify-js'),
 
@@ -246,7 +245,7 @@ module.exports = function(args, program) {
 	// create runtime folder structure for alloy
 	_.each(['COMPONENT','WIDGET','RUNTIME_STYLE'], function(type) {
 		var p = path.join(paths.resources, titaniumFolder, 'alloy', CONST.DIR[type]);
-		wrench.mkdirSyncRecursive(p, 0755);
+		fs.mkdirsSync(p, { mode: 0755 });
 	});
 
 	// Copy in all developer assets, libs, and additional resources
@@ -311,16 +310,16 @@ module.exports = function(args, program) {
 		var iPhonePlatformDir = path.join(paths.project, 'platform', 'iphone');
 		if (fs.existsSync(iPhonePlatformDir)) {
 			logger.trace('Deleting ' + iPhonePlatformDir.yellow);
-			wrench.rmdirSyncRecursive(iPhonePlatformDir);
+			fs.removeSync(iPhonePlatformDir);
 		}
 	} else {
 		sourcePlatformDirs = [ 'platform/' + buildPlatform ];
 	}
 	if (fs.existsSync(destPlatformDir)) {
 		logger.debug('Resetting ' + destPlatformDir.yellow);
-		wrench.rmdirSyncRecursive(destPlatformDir);
+		fs.removeSync(destPlatformDir);
 	}
-	wrench.mkdirSyncRecursive(destPlatformDir, 0755);
+	fs.mkdirsSync(destPlatformDir, { mode: 0755 });
 	fs.writeFileSync(path.join(destPlatformDir, 'alloy_generated'), generateMessage('platform'));
 	sourcePlatformDirs.forEach(function (dir) {
 		var dirs = [ dir ];
@@ -329,7 +328,7 @@ module.exports = function(args, program) {
 			dir = path.join(paths.app, dir);
 			if (fs.existsSync(dir)) {
 				logger.debug('Copying ' + dir.yellow + ' --> ' + destPlatformDir.yellow);
-				wrench.copyDirSyncRecursive(dir, destPlatformDir, { preserve: true });
+				fs.copySync(dir, destPlatformDir); // FIXME How do avoid an error is it exists. Used to use preserve option, but that's even been removed from wrench!
 			}
 		});
 	});
@@ -342,9 +341,9 @@ module.exports = function(args, program) {
 	}
 	if (fs.existsSync(destI18NDir)) {
 		logger.debug('Resetting ' + destI18NDir.yellow);
-		wrench.rmdirSyncRecursive(destI18NDir);
+		fs.removeSync(destI18NDir);
 	}
-	wrench.mkdirSyncRecursive(destI18NDir, 0755);
+	fs.mkdirsSync(destI18NDir, { mode: 0755 });
 	fs.writeFileSync(path.join(destI18NDir, 'alloy_generated'), generateMessage('i18n'));
 	sourceI18NPaths.forEach(function (dir) {
 		if (fs.existsSync(dir)) {
@@ -859,15 +858,15 @@ function parseAlloyComponent(view, dir, manifest, noView, fileRestriction) {
 	var runtimeStylePath = path.join(compileConfig.dir.resources, titaniumFolder,
 		path.relative(compileConfig.dir.resources, files.RUNTIME_STYLE));
 	if (manifest) {
-		wrench.mkdirSyncRecursive(
+		fs.mkdirsSync(
 			path.join(compileConfig.dir.resources, titaniumFolder, 'alloy', CONST.DIR.WIDGET,
 				manifest.id, widgetDir),
-			0755
+			{ mode: 0755 }
 		);
-		wrench.mkdirSyncRecursive(
+		fs.mkdirsSync(
 			path.join(compileConfig.dir.resources, titaniumFolder, 'alloy', CONST.DIR.WIDGET,
 				manifest.id, widgetStyleDir),
-			0755
+			{ mode: 0755 }
 		);
 
 		// [ALOY-967] merge "i18n" dir in widget folder
@@ -974,7 +973,7 @@ function parseAlloyComponent(view, dir, manifest, noView, fileRestriction) {
 			{ WIDGETID: manifest.id }
 		);
 	}
-	wrench.mkdirSyncRecursive(path.dirname(runtimeStylePath), 0755);
+	fs.mkdirsSync(path.dirname(runtimeStylePath), { mode: 0755 });
 	fs.writeFileSync(runtimeStylePath, styleCode);
 }
 
@@ -1053,7 +1052,7 @@ function processModels(dirs) {
 				modelRuntimeDir = path.join(compileConfig.dir.resources,
 					titaniumFolder, 'alloy', 'widgets', manifest.id, 'models');
 			}
-			wrench.mkdirSyncRecursive(modelRuntimeDir, 0755);
+			fs.mkdirsSync(modelRuntimeDir, { mode: 0755 });
 			fs.writeFileSync(path.join(modelRuntimeDir,casedBasename+'.js'), code);
 			models.push(casedBasename);
 		});

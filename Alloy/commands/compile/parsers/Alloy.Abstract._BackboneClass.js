@@ -1,5 +1,5 @@
 var path = require('path'),
-	wrench = require('wrench'),
+	fs = require('fs-extra'),
 	CU = require('../compilerUtils'),
 	U = require('../../../utils'),
 	CONST = require('../../../common/constants'),

@@ -2,8 +2,7 @@ var U = require('../../utils'),
 	colors = require('colors'),
 	path = require('path'),
 	os = require('os'),
-	fs = require('fs'),
-	wrench = require('wrench'),
+	fs = require('fs-extra'),
 	jsonlint = require('jsonlint'),
 	logger = require('../../logger'),
 	astController = require('./ast/controller'),
@@ -613,7 +612,7 @@ exports.copyWidgetResources = function(resources, resourceDir, widgetId, opts) {
 				var destDir = path.join(resourceDir, dirname, widgetId);
 				var dest = path.join(destDir, path.basename(file));
 				if (!path.existsSync(destDir)) {
-					wrench.mkdirSyncRecursive(destDir, 0755);
+					fs.mkdirsSync(destDir, { mode: 0755 });
 				}
 
 				logger.trace('Copying ' + file.yellow + ' --> ' +
@@ -625,7 +624,7 @@ exports.copyWidgetResources = function(resources, resourceDir, widgetId, opts) {
 		// [ALOY-1002] Remove ios folder copied from widget
 		var iosDir = path.join(resourceDir, 'ios');
 		if (fs.existsSync(iosDir)) {
-			wrench.rmdirSyncRecursive(iosDir);
+			fs.removeSync(iosDir);
 		}
 		logger.trace(' ');
 	});
@@ -638,17 +637,17 @@ exports.copyWidgetResources = function(resources, resourceDir, widgetId, opts) {
 			var widgetAssetSourceDir = path.join(widgetThemeDir, 'assets');
 			var widgetAssetTargetDir = path.join(resourceDir, widgetId);
 			if(fs.existsSync(widgetAssetSourceDir)) {
-				wrench.copyDirSyncRecursive(widgetAssetSourceDir, widgetAssetTargetDir, {preserve: true});
+				fs.copySync(widgetAssetSourceDir, widgetAssetTargetDir); // FIXME How do avoid an error is it exists. Used to use preserve option, but that's even been removed from wrench!
 			}
 			// platform-specific assets from the widget must override those of the theme
 			if(platform && path.existsSync(path.join(resources[0], platform))) {
-				wrench.copyDirSyncRecursive(path.join(resources[0], platform), widgetAssetTargetDir, {preserve: true});
+				fs.copySync(path.join(resources[0], platform), widgetAssetTargetDir); // FIXME How do avoid an error is it exists. Used to use preserve option, but that's even been removed from wrench!
 			}
 			// however platform-specific theme assets must override the platform assets from the widget
 			if(platform && path.existsSync(path.join(widgetAssetSourceDir, platform))) {
 				logger.trace('Processing platform-specific theme assets for the ' + widgetId + ' widget');
 				widgetAssetSourceDir = path.join(widgetAssetSourceDir, platform);
-				wrench.copyDirSyncRecursive(widgetAssetSourceDir, widgetAssetTargetDir, {preserve: true});
+				fs.copySync(widgetAssetSourceDir, widgetAssetTargetDir); // FIXME How do avoid an error is it exists. Used to use preserve option, but that's even been removed from wrench!
 			}
 
 			// [ALOY-1002] Remove platform-specific folders copied from theme
@@ -657,7 +656,7 @@ exports.copyWidgetResources = function(resources, resourceDir, widgetId, opts) {
 				_.each(files, function(file) {
 					var source = path.join(widgetAssetTargetDir, file);
 					if (path.existsSync(source) && fs.statSync(source).isDirectory()) {
-						wrench.rmdirSyncRecursive(source);
+						fs.removeSync(source);
 					}
 				});
 			}
@@ -679,7 +678,7 @@ exports.mergeI18N = function mergeI18N(src, dest, opts) {
 			if (!fs.existsSync(srcFile)) return;
 
 			if (fs.statSync(srcFile).isDirectory()) {
-				fs.existsSync(destFile) || wrench.mkdirSyncRecursive(destFile, 0755);
+				fs.existsSync(destFile) || fs.mkdirsSync(destFile, { mode: 0755 });
 				return walk(srcFile, destFile);
 			}
 
@@ -844,7 +843,7 @@ function generateConfig(obj) {
 		logger.info(' [config.json] regenerating CFG.js from config.json...');
 		buildLog.data.cfgHash = hash;
 		// write out the config runtime module
-		wrench.mkdirSyncRecursive(resourcesBase, 0755);
+		fs.mkdirsSync(resourcesBase, { mode: 0755 });
 
 		//logger.debug('Writing "Resources/' + (platform ? platform + '/' : '') + 'alloy/CFG.js"...');
 		var output = "module.exports=" + JSON.stringify(o) + ";";
@@ -853,7 +852,7 @@ function generateConfig(obj) {
 		// TODO: deal with TIMOB-14884
 		var baseFolder = path.join(obj.dir.resources, 'alloy');
 		if (!fs.existsSync(baseFolder)) {
-			wrench.mkdirSyncRecursive(baseFolder, 0755);
+			fs.mkdirsSync(baseFolder, { mode: 0755 });
 		}
 		fs.writeFileSync(path.join(baseFolder, 'CFG.js'), output);
 	}

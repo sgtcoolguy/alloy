@@ -1,7 +1,6 @@
-var fs = require('fs'),
+var fs = require('fs-extra'),
 	path = require('path'),
 	os = require('os'),
-	wrench = require('wrench'),
 	colors = require('colors'),
 	exec = require('child_process').exec,
 	TU = require('../lib/testUtils'),

@@ -1,7 +1,6 @@
 var exec = require('child_process').exec,
-	fs = require('fs'),
+	fs = require('fs-extra'),
 	os = require('os'),
-	wrench = require('wrench'),
 	path = require('path'),
 	JsDiff = require('diff'),
 	_ = require('../../Alloy/lib/alloy/underscore')._,
@@ -26,9 +25,9 @@ exports.paths = {
 //             is successfully recreated.
 function resetTestApp(callback) {
 	var paths = exports.paths;
-	wrench.rmdirSyncRecursive(paths.harness, true);
-	wrench.mkdirSyncRecursive(paths.harness, 0777);
-	wrench.copyDirSyncRecursive(paths.harnessTemplate, paths.harness);
+	fs.removeSyn(paths.harnes/*s, true*/); // FIXME How do we fail silently with fs-extra?
+	fs.mkdirsSync(paths.harness, { mode: 0777 });
+	fs.copySync(paths.harnessTemplate, paths.harness);
 	exec('alloy new "' + paths.harness + '"', function(error, stdout, stderr) {
 		if (error) {
 			console.error('Failed to create new alloy project at ' + paths.harness);

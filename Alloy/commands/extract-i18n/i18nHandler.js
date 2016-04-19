@@ -3,9 +3,8 @@ var U = require('../../utils'),
     path = require('path'),
     _ = require("../../lib/alloy/underscore")._,
     XMLSerializer = require("xmldom").XMLSerializer,
-    fs = require('fs'),
+    fs = require('fs-extra'),
     path = require('path'),
-    wrench = require('wrench'),
     os = require('os');
 
 var FILE_TEMPLATE = '<?xml version="1.0" encoding="UTF-8"?>' + os.EOL + '<resources>' +
@@ -25,7 +24,7 @@ module.exports = function(projectRoot, language) {
 
     // create 18n folder if it doesn't exist
     if (!fs.existsSync(i18nDir)) {
-        wrench.mkdirSyncRecursive(i18nDir, 0755);
+        fs.mkdirsSync(i18nDir, { mode: 0755 });
     }
 
     // create i18n file if it doesn't exist
