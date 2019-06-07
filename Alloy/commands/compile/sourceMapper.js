@@ -56,8 +56,10 @@ function getTextFromGenerator(content, template) {
 exports.generateCodeAndSourceMap = function(generator, compileConfig) {
 	var target = generator.target;
 	var data = generator.data;
+	var outfile = target.filepath;
+	var relativeOutfile = path.relative(compileConfig.dir.project, outfile);
 	var markers = _.map(data, function(v, k) { return k; });
-	var mapper = new SM.SourceMapGenerator({ file: target.filename });
+	var mapper = new SM.SourceMapGenerator({ file: relativeOutfile });
 	var genMap = {
 		file: target.filename,
 		count: 1,
@@ -115,8 +117,6 @@ exports.generateCodeAndSourceMap = function(generator, compileConfig) {
 	var outputResult = babel.transformFromAstSync(ast, genMap.code, options);
 
 	// write the generated controller code
-	var outfile = target.filepath;
-	var relativeOutfile = path.relative(compileConfig.dir.project, outfile);
 	fs.mkdirpSync(path.dirname(outfile));
 	chmodr.sync(path.dirname(outfile), 0755);
 	fs.writeFileSync(outfile, outputResult.code.toString());
@@ -130,7 +130,7 @@ exports.generateCodeAndSourceMap = function(generator, compileConfig) {
 		fs.mkdirpSync(path.dirname(outfile));
 		chmodr.sync(path.dirname(outfile), 0755);
 		fs.writeFileSync(outfile, JSON.stringify(mapper.toJSON()));
-		// FIXME: babel source map generation is broken! So we copy teh source map we generated initially
+		// FIXME: babel source map generation is broken! So we copy the source map we generated initially
 		// fs.writeFileSync(outfile, JSON.stringify(outputResult.map));
 		// logger.debug('  map:        "' + relativeOutfile + '"');
 	}
